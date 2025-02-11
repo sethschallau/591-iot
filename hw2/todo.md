@@ -5,7 +5,6 @@
 - Must **retain messages** for `lightSensor`, `threshold`, `LightStatus`, `Status/RaspberryPiA`, and `Status/RaspberryPiC`.
 - Must support **QoS 2** for all topics.
 - Should detect **ungraceful disconnects** and publish retained "offline" messages for Raspberry Pi A and C.
-- Provide **timestamped logging** of all messages sent and received.
 
 ---
 
