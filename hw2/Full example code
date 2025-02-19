@@ -1,0 +1,158 @@
+# Code for Raspberry Pi A:
+
+import paho.mqtt.client as mqtt
+import spidev
+import time
+
+# MQTT Configuration
+BROKER = "192.168.X.X"  # Replace with the broker IP
+LWT_TOPIC = "Status/RaspberryPiA"
+SENSOR_TOPIC = "lightSensor"
+THRESHOLD_TOPIC = "threshold"
+
+client = mqtt.Client()
+client.will_set(LWT_TOPIC, "offline", retain=True)  # Set Last Will & Testament
+
+# SPI Configuration for ADC (MCP3008)
+spi = spidev.SpiDev()
+spi.open(0, 0)
+spi.max_speed_hz = 1350000
+
+def read_adc(channel):
+    adc = spi.xfer2([1, (8 + channel) << 4, 0])
+    value = ((adc[1] & 3) << 8) + adc[2]
+    return value
+
+client.connect(BROKER)
+client.publish(LWT_TOPIC, "online", retain=True)
+
+prev_ldr = prev_pot = 0
+
+while True:
+    ldr_value = read_adc(0)
+    pot_value = read_adc(1)
+
+    if abs(ldr_value - prev_ldr) > 5:
+        client.publish(SENSOR_TOPIC, ldr_value, retain=True)
+        prev_ldr = ldr_value
+
+    if abs(pot_value - prev_pot) > 5:
+        client.publish(THRESHOLD_TOPIC, pot_value, retain=True)
+        prev_pot = pot_value
+
+    time.sleep(0.1)
+
+# Disconnect Handling:
+def on_disconnect(client, userdata, rc):
+    client.publish(LWT_TOPIC, "offline", retain=True)
+
+client.on_disconnect = on_disconnect
+
+
+
+# Code for Raspberry Pi B:
+
+import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
+
+BROKER = "192.168.X.X"
+
+LED1 = 17
+LED2 = 27
+LED3 = 22
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup([LED1, LED2, LED3], GPIO.OUT)
+
+def on_message(client, userdata, msg):
+    if msg.topic == "LightStatus":
+        GPIO.output(LED1, GPIO.HIGH if msg.payload.decode() == "TurnOn" else GPIO.LOW)
+    elif msg.topic == "Status/RaspberryPiA":
+        GPIO.output(LED2, GPIO.HIGH if msg.payload.decode() == "online" else GPIO.LOW)
+    elif msg.topic == "Status/RaspberryPiC":
+        state = msg.payload.decode()
+        GPIO.output(LED3, GPIO.HIGH if state == "online" else GPIO.LOW)
+        if state == "offline":
+            GPIO.output(LED1, GPIO.LOW)
+
+client = mqtt.Client()
+client.connect(BROKER)
+
+client.subscribe("LightStatus")
+client.subscribe("Status/RaspberryPiA")
+client.subscribe("Status/RaspberryPiC")
+
+client.on_message = on_message
+client.loop_forever()
+
+
+#Code for Raspberry Pi C:
+import paho.mqtt.client as mqtt
+
+BROKER = "192.168.X.X"
+LIGHT_SENSOR_TOPIC = "lightSensor"
+THRESHOLD_TOPIC = "threshold"
+LIGHT_STATUS_TOPIC = "LightStatus"
+LWT_TOPIC = "Status/RaspberryPiC"
+
+client = mqtt.Client()
+client.will_set(LWT_TOPIC, "offline", retain=True)
+client.connect(BROKER)
+client.publish(LWT_TOPIC, "online", retain=True)
+
+last_status = None
+
+def on_message(client, userdata, msg):
+    global last_status
+    sensor_val = int(client.get(LIGHT_SENSOR_TOPIC, 0))
+    threshold_val = int(client.get(THRESHOLD_TOPIC, 0))
+
+    new_status = "TurnOff" if sensor_val >= threshold_val else "TurnOn"
+    if new_status != last_status:
+        client.publish(LIGHT_STATUS_TOPIC, new_status, retain=True)
+        last_status = new_status
+
+client.subscribe([(LIGHT_SENSOR_TOPIC, 2), (THRESHOLD_TOPIC, 2)])
+client.on_message = on_message
+client.loop_forever()
+
+
+
+#Code for second Smart device:
+
+import paho.mqtt.client as mqtt
+import time
+
+BROKER = "192.168.X.X"
+LOG_FILE = "mqtt_log.txt"
+
+topics = ["lightSensor", "threshold", "LightStatus", "Status/RaspberryPiA", "Status/RaspberryPiC"]
+message_log = {}
+
+def on_message(client, userdata, msg):
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    message = f"{timestamp} | {msg.topic} | {msg.payload.decode()}\n"
+
+    if msg.topic in message_log and message_log[msg.topic] == msg.payload.decode():
+        message = f"{timestamp} | {msg.topic} | {msg.payload.decode()} (Duplicate)\n"
+    
+    message_log[msg.topic] = msg.payload.decode()
+    
+    with open(LOG_FILE, "a") as log:
+        log.write(message)
+
+client = mqtt.Client()
+client.connect(BROKER)
+for topic in topics:
+    client.subscribe(topic)
+
+client.on_message = on_message
+client.loop_forever()
+
+
+
+
+
+
+
+
