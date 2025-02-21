@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 import spidev
 import time
 
-BROKER = "192.168.1.69"
+BROKER = "X.X.X.X"
 TOPICS = {
     "lightSensor": "lightSensor",
     "threshold": "threshold",
