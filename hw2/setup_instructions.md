@@ -1,0 +1,65 @@
+## **Laptop #2 Instructions**
+### **Install**
+- You will need a working python3 install
+- pip3 install paho-mqtt
+
+### **Setup**
+- On line 4, change the broker variable to the corresponding broker IP address
+
+### **Running**
+- python3 listener.py
+
+## **Pi B Instructions**
+### **Install**
+- You will need a working python3 install
+- pip3 install paho-mqtt
+
+### **Setup**
+- On line 4, change the broker variable to the corresponding broker IP address
+
+### **Running**
+- python3 pib.py
+
+## **Broker Instructions**
+### **Install**
+```sh
+sudo apt install mosquitto mosquitto-clients -y
+```
+
+### **Setup**
+Edit the Mosquitto configuration file:
+```sh
+sudo nano /etc/mosquitto/mosquitto.conf
+```
+Add the following lines:
+```sh
+listener 1883
+allow_anonymous true
+max_queued_messages 1000
+queue_qos0_messages false
+```
+Save and exit.
+
+### **Restart Mosquitto**
+```sh
+sudo systemctl restart mosquitto
+```
+
+### **Start Mosquitto Manually**
+```sh
+mosquitto -c /etc/mosquitto/mosquitto.conf -v
+```
+
+### **Testing the Broker**
+Open **two separate terminals** and run:
+
+**Subscriber Terminal:**
+```sh
+mosquitto_sub -h localhost -t "test/topic" -q 2
+```
+
+**Publisher Terminal:**
+```sh
+mosquitto_pub -h localhost -t "test/topic" -m "Going Test Mode" -q 2 -r
+```
+

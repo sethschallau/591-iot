@@ -1,6 +1,5 @@
 import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
-import time
 
 BROKER = "192.168.1.69"
 TOPICS = {
