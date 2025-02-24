@@ -1,13 +1,3 @@
-## **Laptop #2 Instructions**
-### **Install**
-- You will need a working python3 install
-- pip3 install paho-mqtt
-
-### **Setup**
-- On line 4, change the broker variable to the corresponding broker IP address
-
-### **Running**
-- python3 listener.py
 
 ## **Pi B Instructions**
 ### **Install**
@@ -20,7 +10,10 @@
 ### **Running**
 - python3 pib.py
 
-## **Broker Instructions**
+### **Getting the log file**
+- the log file will be written to the directory where the file is run
+
+## **Laptop 1 Broker Instructions**
 ### **Install**
 ```sh
 sudo apt install mosquitto mosquitto-clients -y
@@ -63,3 +56,13 @@ mosquitto_sub -h localhost -t "test/topic" -q 2
 mosquitto_pub -h localhost -t "test/topic" -m "Going Test Mode" -q 2 -r
 ```
 
+## **Laptop #2 Instructions**
+### **Install**
+- You will need a working python3 install
+- pip3 install paho-mqtt
+
+### **Setup**
+- On line 4, change the broker variable to the corresponding broker IP address
+
+### **Running**
+- python3 listener.py
