@@ -1,3 +1,14 @@
+## **Pi A Instructions**
+### **Install**
+- You will need a working python3 install
+- pip3 install paho-mqtt
+
+### **Setup**
+- On line 4, change the broker variable to the corresponding broker IP address
+
+
+### **Running**
+- python3 pib.py
 
 ## **Pi B Instructions**
 ### **Install**
@@ -7,6 +18,18 @@
 ### **Setup**
 - On line 4, change the broker variable to the corresponding broker IP address
 - I made a service file, to restart the service on pib, sudo systemctl restart mqtt_pib.service
+
+
+### **Running**
+- python3 pib.py
+
+## **Pi C Instructions**
+### **Install**
+- You will need a working python3 install
+- pip3 install paho-mqtt
+
+### **Setup**
+- On line 3, change the broker variable to the corresponding broker IP address
 
 
 ### **Running**
