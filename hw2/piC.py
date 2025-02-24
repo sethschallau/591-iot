@@ -45,7 +45,7 @@ def on_message(client, userdata, msg):
             print("Invalid sensor or threshold value.")
             return
 
-        # This comparison matches your homework description exactly:
+        # This comparison match:
         if sensor_value >= threshold_value:
             new_decision = "TurnOn"
         else:
