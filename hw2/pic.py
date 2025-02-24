@@ -65,7 +65,7 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 print("Connecting to broker...")
-client.connect(BROKER, 1883, 60)
+client.connect(BROKER, 1883, 10)
 
 try:
     client.loop_forever()
