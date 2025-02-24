@@ -6,12 +6,12 @@
 
 ### **Setup**
 - On line 4, change the broker variable to the corresponding broker IP address
+- I made a service file, to restart the service on pib, sudo systemctl restart mqtt_pib.service
+
 
 ### **Running**
 - python3 pib.py
 
-### **Getting the log file**
-- the log file will be written to the directory where the file is run
 
 ## **Laptop 1 Broker Instructions**
 ### **Install**
@@ -66,3 +66,6 @@ mosquitto_pub -h localhost -t "test/topic" -m "Going Test Mode" -q 2 -r
 
 ### **Running**
 - python3 listener.py
+
+### **Getting the log file**
+- the log file will be written to the directory where the file is run
