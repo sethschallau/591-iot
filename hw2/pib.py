@@ -7,7 +7,7 @@ TOPICS = {
     "Status/RaspberryPiA": 27,
     "Status/RaspberryPiC": 22,
 }
-
+latest_light_status = "TurnOff"
 
 GPIO.setmode(GPIO.BCM)
 for pin in TOPICS.values():
@@ -25,35 +25,35 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
+    global latest_light_status
     topic = msg.topic
     payload = msg.payload.decode().strip()
     pin = TOPICS.get(topic)
 
     if pin:
         if topic == "LightStatus":
+            latest_light_status = payload
             if payload == "TurnOn":
                 GPIO.output(pin, GPIO.HIGH)
-                print(f"LED1 (LightStatus) ON")
             elif payload == "TurnOff":
                 GPIO.output(pin, GPIO.LOW)
-                print(f"LED1 (LightStatus) OFF")
 
         elif topic == "Status/RaspberryPiA":
             if payload == "online":
                 GPIO.output(pin, GPIO.HIGH)
-                print(f"LED2 (Pi A Status) ON")
             elif payload == "offline":
                 GPIO.output(pin, GPIO.LOW)
-                print(f"LED2 (Pi A Status) OFF")
 
         elif topic == "Status/RaspberryPiC":
             if payload == "online":
                 GPIO.output(pin, GPIO.HIGH)
-                print(f"LED3 (Pi C Status) ON")
+                if latest_light_status == "TurnOn":
+                    GPIO.output(TOPICS["LightStatus"], GPIO.HIGH)
+                else:
+                    GPIO.output(TOPICS["LightStatus"], GPIO.LOW)
             elif payload == "offline":
                 GPIO.output(pin, GPIO.LOW)
                 GPIO.output(TOPICS["LightStatus"], GPIO.LOW)
-                print(f"LED3 (Pi C Status) OFF + LED1 OFF")
 
 
 client = mqtt.Client()
