@@ -15,7 +15,6 @@ def classify_message(payload):
 
 def on_message(client, userdata, message):
     received_payload = message.payload.decode()
-    print(f"Received: {received_payload}")
 
     classification_result = classify_message(received_payload)
 
@@ -26,6 +25,5 @@ client.on_message = on_message
 
 client.connect(BROKER, PORT)
 client.subscribe(SUBSCRIBE_TOPIC)
-print(f"Subscribed to {SUBSCRIBE_TOPIC}")
 
 client.loop_forever()
