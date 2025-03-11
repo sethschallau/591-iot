@@ -1,4 +1,6 @@
 # train_classifier.py
+# need to collect real IMU data from your actual sensor while opening and closing the door.
+# Save that data and replace this synthetic data generation with real data
 
 import json
 import random
@@ -12,11 +14,11 @@ y = []
 
 for _ in range(100):
   # Door open sample:
-  x.append([random.uniform(1.5, 3.0), random.uniform(-1.0, 1.0), random.uniform(-0.5, 0.5), random.uniform(30, 60), random.uniform(0, 10), random.uniform(0, 10)])    // approximation of how a door might move
+  x.append([random.uniform(1.5, 3.0), random.uniform(-1.0, 1.0), random.uniform(-0.5, 0.5), random.uniform(30, 60), random.uniform(0, 10), random.uniform(0, 10)])    # approximation of how a door might move
   y.append(1)  # 1 = open
 
   # Door close sample
-  x.append([random.uniform(-3.0, -1.5), random.uniform(-1.0, 1.0), random.uniform(-0.5, 0.5), random.uniform(-60, -30), random.uniform(0, 10), random.uniform(0, 10)])   // approximation of how a door might move
+  x.append([random.uniform(-3.0, -1.5), random.uniform(-1.0, 1.0), random.uniform(-0.5, 0.5), random.uniform(-60, -30), random.uniform(0, 10), random.uniform(0, 10)])   # approximation of how a door might move
   y.append(0)  # 0 = close
 
 # Train-test split
