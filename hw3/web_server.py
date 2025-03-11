@@ -11,7 +11,7 @@ app.config['MQTT_TOPIC'] = 'sethschallauinterface'
 mqtt = Mqtt(app)
 
 # Store latest door status
-door_status = "Unknown"
+door_status = "closed"
 
 # Handle incoming MQTT messages
 @mqtt.on_message()
