@@ -3,10 +3,13 @@ from flask_mqtt import Mqtt
 
 app = Flask(__name__)
 
-app.config['MQTT_BROKER_URL'] = 'broker.hivemq.com'
+app.config['MQTT_BROKER_URL'] = '13.59.199.173'
 app.config['MQTT_BROKER_PORT'] = 1883
+app.config['MQTT_USERNAME'] = 'ec2-user'
+app.config['MQTT_PASSWORD'] = '591iot'
 app.config['MQTT_KEEPALIVE'] = 60
 app.config['MQTT_TOPIC'] = 'sethschallauinterface'
+
 
 mqtt = Mqtt(app)
 

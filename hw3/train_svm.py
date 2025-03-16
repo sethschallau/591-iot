@@ -24,7 +24,7 @@ def load_and_label_data(files):
 
 df = load_and_label_data(files)
 
-def create_chunks(df, chunk_size=6):
+def create_chunks(df, chunk_size=12):
     X, y = [], []
     
     for i in range(len(df) - chunk_size + 1):
