@@ -2,43 +2,35 @@ import pandas as pd
 import numpy as np
 import pickle
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split, cross_val_score, cross_validate
+from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
-files = ["closed_clean.csv", "closing_clean.csv", "open_clean.csv", "opening_clean.csv"]
+# Load dataset
+df = pd.read_csv("raw_data/self_labeling_data.csv")
 
-def load_and_label_data(files):
-    dataframes = []
-    for file in files:
-        df = pd.read_csv("raw_data/" + file)
-        df["state"] = df["state"].map({
-            "closed": 0, "open": 0,
-            "closing": 1, "opening": 1 
-        })
-        
-        dataframes.append(df)
-    
-    return pd.concat(dataframes, ignore_index=True)
-
-df = load_and_label_data(files)
+# Map states to 0 (stable) and 1 (moving)
+df["state"] = df["state"].map({"stable": 0, "moving": 1})
 
 def create_chunks(df, chunk_size=12):
     X, y = [], []
-    
-    for i in range(len(df) - chunk_size + 1):
+    i = 0
+    while i <= len(df) - chunk_size:
         chunk = df.iloc[i:i + chunk_size]
-        
-        features = chunk[["ax", "ay", "az", "gx", "gy", "gz"]].values.flatten()
-        label = chunk["state"].values[-1]
-        
-        X.append(features)
-        y.append(label)
-    
+        states = chunk["state"].unique()
+
+        if len(states) == 1:  # Only accept uniform-state chunks
+            features = chunk[["ax", "az", "gx", "gz"]].values.flatten()
+            X.append(features)
+            y.append(states[0])
+            i += chunk_size  # Move to the next non-overlapping window
+        else:
+            i += 1  # Slide window if mixed state
+
     return np.array(X), np.array(y)
 
-X, y = create_chunks(df, chunk_size=6)
+X, y = create_chunks(df, chunk_size=12)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -71,7 +63,7 @@ print(f"Precision: {np.mean(cv_results_3['test_precision']):.2%}")
 print(f"Recall: {np.mean(cv_results_3['test_recall']):.2%}")
 print(f"F1 Score: {np.mean(cv_results_3['test_f1']):.2%}")
 
-print("\nCombined metric**")
+print("\nTest Results")
 print(f"Accuracy: {accuracy:.2%}")
 print(f"Precision: {precision:.2%}")
 print(f"Recall: {recall:.2%}")

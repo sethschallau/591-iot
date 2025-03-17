@@ -46,15 +46,16 @@ void connectMQTT() {
     
     while (!client.connected()) {
         Serial.print("Attempting MQTT connection...");
-        if (client.connect("ESP32Client")) {
+        if (client.connect("ESP32Client", mqtt_user, mqtt_pass)) {
             Serial.println("Connected to MQTT!");
             digitalWrite(LED_PIN, HIGH);
         } else {
             Serial.print("Failed, rc=");
             Serial.print(client.state());
             Serial.println(" Retrying in 5s...");
-            delay(5000);
             digitalWrite(LED_PIN, LOW);
+            delay(5000);
+            
         }
     }
 }

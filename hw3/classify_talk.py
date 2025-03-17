@@ -4,7 +4,6 @@ import json
 import numpy as np
 from collections import deque
 
-
 BROKER = "13.59.199.173"
 PORT = 1883
 USERNAME = "ec2-user"
@@ -57,14 +56,13 @@ def classify_chunk(chunk):
     return "stable" if prediction == 0 else "moving"
 
 def on_message(client, userdata, message):
-    global current_door, previous_stable_state
+    global current_door
     data = json.loads(message.payload.decode())
-    buffer.append([data["ax"], data["ay"], data["az"], data["gx"], data["gy"], data["gz"]])
-
+    buffer.append([data["ax"], data["az"], data["gx"], data["gz"]])
 
     if len(buffer) == 12:
         classification_result = classify_chunk(list(buffer))
-        # print(current_door)
+
         if classification_result == "moving" and current_door.state() in ["closed", "open"]:
             current_door = current_door.detect_moving()
 
@@ -73,10 +71,6 @@ def on_message(client, userdata, message):
             client.publish(PUBLISH_TOPIC, current_door.state())
 
         buffer.clear()
-        # print(classification_result)
-        # print(current_door)
-        # print()
-    
 
 client = mqtt.Client()
 client.username_pw_set(USERNAME, PASSWORD)
