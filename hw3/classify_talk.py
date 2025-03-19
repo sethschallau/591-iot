@@ -12,34 +12,40 @@ SUBSCRIBE_TOPIC = "sethschallaudoor"
 PUBLISH_TOPIC = "sethschallauinterface"
 
 class ClosedDoor:
-    def __init__(self):
-        self.next_state = OpenDoor 
-
     def state(self):
         return "closed"
 
-    def detect_moving(self):
-        return MovingDoor(self.next_state()) 
+    def handle(self, event):
+        if event == "opening":
+            return OpeningDoor()
+        return self
 
 class OpenDoor:
-    def __init__(self):
-        self.next_state = ClosedDoor
-
     def state(self):
         return "open"
 
-    def detect_moving(self):
-        return MovingDoor(self.next_state())
+    def handle(self, event):
+        if event == "closing":
+            return ClosingDoor()
+        return self
 
-class MovingDoor:
-    def __init__(self, next_state):
-        self.next_state = next_state
-
+class OpeningDoor:
     def state(self):
-        return "moving"
+        return "opening"
 
-    def detect_stable(self):
-        return self.next_state
+    def handle(self, event):
+        if event == "stable":
+            return OpenDoor()
+        return self
+
+class ClosingDoor:
+    def state(self):
+        return "closing"
+
+    def handle(self, event):
+        if event == "stable":
+            return ClosedDoor()
+        return self
     
 current_door = ClosedDoor()
 buffer = deque(maxlen=12)
@@ -53,7 +59,12 @@ classifier = load_classifier()
 def classify_chunk(chunk):
     features = np.array(chunk).flatten().reshape(1, -1)
     prediction = classifier.predict(features)[0]
-    return "stable" if prediction == 0 else "moving"
+    if prediction == 0:
+        return "stable"
+    elif prediction == 1:
+        return "opening"
+    else:
+        return "closing"
 
 def on_message(client, userdata, message):
     global current_door
@@ -61,15 +72,12 @@ def on_message(client, userdata, message):
     buffer.append([data["ax"], data["az"], data["gx"], data["gz"]])
 
     if len(buffer) == 12:
-        classification_result = classify_chunk(list(buffer))
-
-        if classification_result == "moving" and current_door.state() in ["closed", "open"]:
-            current_door = current_door.detect_moving()
-
-        elif classification_result == "stable" and current_door.state() == "moving":
-            current_door = current_door.detect_stable()
+        event = classify_chunk(list(buffer))
+        current_door = current_door.handle(event)
+        print(event)
+        if current_door.state() in ["open", "closed"]:
             client.publish(PUBLISH_TOPIC, current_door.state())
-
+        print(current_door.state())
         buffer.clear()
 
 client = mqtt.Client()

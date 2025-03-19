@@ -111,6 +111,7 @@ void sendSensorData() {
 
     if (client.publish(mqtt_topic, payload)) {
         Serial.println("Data sent: " + String(payload));
+        digitalWrite(LED_PIN, HIGH);
     } else {
         Serial.println("Failed to send data");
     }
