@@ -4,7 +4,6 @@ import json
 import numpy as np
 from collections import deque
 
-
 BROKER = "13.59.199.173"
 PORT = 1883
 USERNAME = "ec2-user"
@@ -43,7 +42,7 @@ class MovingDoor:
         return self.next_state
     
 current_door = ClosedDoor()
-buffer = deque(maxlen=6)
+buffer = deque(maxlen=12)
 
 def load_classifier():
     with open("svm_model.pkl", "rb") as f:
@@ -57,13 +56,13 @@ def classify_chunk(chunk):
     return "stable" if prediction == 0 else "moving"
 
 def on_message(client, userdata, message):
-    global current_door, previous_stable_state
-    data = message.payload.decode()
-    buffer.append([data["ax"], data["ay"], data["az"], data["gx"], data["gy"], data["gz"]])
-    print
-    if len(buffer) == 6:
+    global current_door
+    data = json.loads(message.payload.decode())
+    buffer.append([data["ax"], data["az"], data["gx"], data["gz"]])
+
+    if len(buffer) == 12:
         classification_result = classify_chunk(list(buffer))
-        
+
         if classification_result == "moving" and current_door.state() in ["closed", "open"]:
             current_door = current_door.detect_moving()
 
@@ -71,13 +70,11 @@ def on_message(client, userdata, message):
             current_door = current_door.detect_stable()
             client.publish(PUBLISH_TOPIC, current_door.state())
 
-        print(current_door.state())
         buffer.clear()
-
-    
-
+        print(current_door.state())
 client = mqtt.Client()
 client.username_pw_set(USERNAME, PASSWORD)
+
 client.on_message = on_message
 
 client.connect(BROKER, PORT)
