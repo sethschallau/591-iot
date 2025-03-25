@@ -71,7 +71,7 @@ def on_message(client, userdata, message):
             client.publish(PUBLISH_TOPIC, current_door.state())
 
         buffer.clear()
-        print(current_door.state())
+
 client = mqtt.Client()
 client.username_pw_set(USERNAME, PASSWORD)
 
