@@ -5,8 +5,10 @@ import numpy as np
 from collections import deque
 
 
-BROKER = "broker.hivemq.com"
+BROKER = "13.59.199.173"
 PORT = 1883
+USERNAME = "ec2-user"
+PASSWORD = "591iot"
 SUBSCRIBE_TOPIC = "sethschallaudoor"
 PUBLISH_TOPIC = "sethschallauinterface"
 
@@ -58,7 +60,7 @@ def on_message(client, userdata, message):
     global current_door, previous_stable_state
     data = message.payload.decode()
     buffer.append([data["ax"], data["ay"], data["az"], data["gx"], data["gy"], data["gz"]])
-
+    print
     if len(buffer) == 6:
         classification_result = classify_chunk(list(buffer))
         
@@ -69,11 +71,13 @@ def on_message(client, userdata, message):
             current_door = current_door.detect_stable()
             client.publish(PUBLISH_TOPIC, current_door.state())
 
+        print(current_door.state())
         buffer.clear()
 
     
 
 client = mqtt.Client()
+client.username_pw_set(USERNAME, PASSWORD)
 client.on_message = on_message
 
 client.connect(BROKER, PORT)
