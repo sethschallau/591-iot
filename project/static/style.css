@@ -1,0 +1,37 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: 'Share Tech';
+    background: black;
+    position: relative;
+    overflow: hidden;
+}
+
+.top {
+    height: 50vh;
+    background: linear-gradient(to bottom, #0d1b14, #4f6458);
+}
+
+.bottom {
+    height: 50vh;
+    background: linear-gradient(to top, #0d1b14, #4f6458);
+}
+
+.overlay {
+    position: absolute;
+    top: 30%;
+    left: 5%;
+    transform: translateY(-50%);
+    z-index: 999;
+    text-align: left;
+    pointer-events: none;
+    color: #c9e3d2;
+}
+
+.overlay div {
+    font-size: 1.8rem;
+    font-weight: 400;
+    text-transform: none;
+    opacity: 0.85;
+}

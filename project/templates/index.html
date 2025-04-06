@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dispenser Stats</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/status');
+                const data = await res.json();
+
+                document.getElementById('rolls').textContent =
+                    appendValue('rolls', data.rolls_used);
+                document.getElementById('trees').textContent =
+                    appendValue('trees', data.trees_used);
+                document.getElementById('co2').textContent =
+                    appendValue('co2', `${data.co2_used_lbs} lbs`);
+            } catch (err) {
+                console.error("Failed to fetch status", err);
+            }
+        }
+
+        function appendValue(id, value) {
+            const label = document.getElementById(id).getAttribute('data-label');
+            return `${label} ${value}`;
+        }
+
+        window.onload = () => {
+            fetchStatus();
+            setInterval(fetchStatus, 1000);
+        };
+    </script>
+</head>
+<body>
+    <div class="top"></div>
+    <div class="bottom"></div>
+    <div class="overlay">
+        <div id="rolls" data-label="rolls consumed:">rolls consumed: --</div>
+        <div id="trees" data-label="trees killed:">trees killed: --</div>
+        <div id="co2" data-label="CO₂ emitted:">CO₂ emitted: --</div>
+
+    </div>
+</body>
+</html>
