@@ -1,5 +1,5 @@
 ### Architecture
-[image on the way]
+![Architecture Diagram](static/project_diagram.jpg)
 
 ### Training
 We need to run the motor with the paper towel attached and log how long it takes to unroll the entire roll. Then we find how many trees and C02 a paper towel roll uses. This will let us calculate.
