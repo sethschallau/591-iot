@@ -1,29 +1,25 @@
 ### Architecture
-ESP86 tracks motor time running and the pushes to MQTT Broker the time.
-Server pulls this, calculates the usage with the analytics down and appends (total rolls, total tree, total c02 usage) to the existing one in a local file
-The server pushes out to the broker again, and the interface pulls from that and displays it
+[image on the way]
 
 ### Training
-We need to run the motor with the paper towel attached and log how long it takes to unroll the entire roll. Then we find how many trees and C02 a paper towel roll uses. This will let us calculate. 
+We need to run the motor with the paper towel attached and log how long it takes to unroll the entire roll. Then we find how many trees and C02 a paper towel roll uses. This will let us calculate.
 
 ### Analytics
 ( total time unrolling / full roll time ) = rolls unrolled
 ( time unrolling / full roll time ) * rolls per tree  = total tree
-( time unrolling / full roll time ) * C02 per roll = C02 usage 
+( time unrolling / full roll time ) * C02 per roll = C02 usage
 
-### Breakdown
-
-We propose a smart home device that tracks automatically rotates paper towels so the user doesn't have to touch the roll when cooking and then provides analytics on a homes paper towel usage and provides feedback on their fiscal and environmental impact due to their paper towel consumption. The project will consist of a stepper motor and a custom paper towel enclosure that rotates when an ultrasonic sensor  detects a user waving for a paper towel. We will also publish to a broker and subscribe with a web service that will display the usage patterns and analyze how many rolls have been used.
-
-Step 1: Design the dispenser; 20%, Alex
-
-Step 2: Configure the sensors to activate the dispenser; 20%, Sayali
-
-Step 3: Setup the web service/server; 10%, Seth
-
-Step 4: Publish the dispenser data to a web service; 20%, Amy
-
-Step 5: Analyze/Visualize the cost and tree usage of the dispensed towels; 10%, Seth
-
+#### Paper Towel Roll to Tree and C02 Emission Ratio
+- 1 Tree = X Rolls of Paper Towels
+- 1 Roll of Paper Towels = Y grams of C02
 
 ### Demo steps
+
+- (5 pts) Moving a hand in front of the ultrasonic sensor sends a signal to the ESP8266
+- (15 pts) Upon receiving the signal, the ESP8266 triggers the stepper motor with a paper towel roll attached
+- (10 pts) When the hand is removed from the sensor's range, the motor stops actuating
+- (15 pts) The ESP8266 tracks how long the motor is activated and sends this time to the cloud MQTT broker
+- (15 pts) A server pulls this information from the broker and stores it locally
+- (10 pts) The time usage is used to calculate the approximate paper towel usage
+- (15 pts) The approximate paper towel usage is used to calculate tree usage and carbon footprint
+- (15 pts) The paper towel, tree, and carbon information is presented to the user on a web interface
