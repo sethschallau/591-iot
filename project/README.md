@@ -15,9 +15,8 @@ We need to run the motor with the paper towel attached and log how long it takes
 
 ### Demo steps
 
-- (5 pts) Moving a hand in front of the ultrasonic sensor sends a signal to the ESP8266
-- (15 pts) Upon receiving the signal, the ESP8266 triggers the stepper motor with a paper towel roll attached
-- (10 pts) When the hand is removed from the sensor's range, the motor stops actuating
+- (10 pts) Moving a hand in front of the ultrasonic sensor sends a signal to the ESP8266
+- (20 pts) Upon receiving the signal, the ESP8266 triggers the stepper motor with a paper towel roll attached
 - (15 pts) The ESP8266 tracks how long the motor is activated and sends this time to the cloud MQTT broker
 - (15 pts) A server pulls this information from the broker and stores it locally
 - (10 pts) The time usage is used to calculate the approximate paper towel usage

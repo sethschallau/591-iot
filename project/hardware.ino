@@ -1,66 +1,115 @@
-// Pin definitions for ULN2003 and 28BYJ-48 motor control
-#define IN1 D3  // GPIO0 -> IN1 on ULN2003
-#define IN2 D4  // GPIO2 -> IN2 on ULN2003
-#define IN3 D5  // GPIO14 -> IN3 on ULN2003
-#define IN4 D6  // GPIO12 -> IN4 on ULN2003
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 
-unsigned long previousMillis = 0; // Variable to store the last time motor state was changed
-const long interval = 5000;        // Interval for running the motor (5 seconds)
+// WiFi and MQTT Config
+const char* ssid = "SethPhone";
+const char* password = "sethisopen";
 
-bool motorRunning = false;  // Motor status: true means running, false means stopped
+const char* mqtt_server = "13.59.199.173";
+const int mqtt_port = 1883;
+const char* mqtt_user = "ec2-user";
+const char* mqtt_pass = "591iot";
+const char* mqtt_topic = "dispenserRunTime";
 
-void setup() {
-  // Set motor control pins as outputs
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-}
+WiFiClient espClient;
+PubSubClient client(espClient);
 
-void loop() {
-  unsigned long currentMillis = millis();
+#define IN1 D3
+#define IN2 D4
+#define IN3 D5
+#define IN4 D6
 
-  // Check if it's time to toggle motor state (5 seconds running, 5 seconds stopped)
-  if (currentMillis - previousMillis >= interval) {
-    // Save the last time the motor state was changed
-    previousMillis = currentMillis;
+unsigned long previousMillis = 0;
+const long interval = 5000;
 
-    if (motorRunning) {
-      // Stop the motor after 5 seconds
-      motorRunning = false;
-      stopMotor();
-    } else {
-      // Start the motor after 5 seconds of stopping
-      motorRunning = true;
-      rotateMotor();  // Rotate motor for 5 seconds
+bool motorRunning = false;
+bool sentMQTT = false;
+
+// WiFi Setup
+void connectWiFi() {
+    Serial.print("Connecting to WiFi...");
+    WiFi.begin(ssid, password);
+    int retries = 0;
+    while (WiFi.status() != WL_CONNECTED && retries < 30) {
+        delay(500);
+        Serial.print(".");
+        retries++;
     }
-  }
-
-  // If the motor is running, keep rotating it
-  if (motorRunning) {
-    rotateMotor();
-  }
+    Serial.println(WiFi.status() == WL_CONNECTED ? "\nWiFi Connected!" : "\nWiFi Failed!");
 }
 
-// Function to rotate the motor (full-step sequence)
+// MQTT Setup
+void connectMQTT() {
+    Serial.println("Connecting to MQTT...");
+    while (!client.connected()) {
+        if (client.connect("ESP32Client", mqtt_user, mqtt_pass)) {
+            Serial.println("Connected to MQTT!");
+        } else {
+            Serial.print("Failed, rc=");
+            Serial.print(client.state());
+            delay(5000);
+        }
+    }
+}
+
+// Motor Control
 void rotateMotor() {
   digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW); digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
-  delay(5);  // Adjust delay to control motor speed
-  
+  delay(5);
   digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH); digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
   delay(5);
-  
   digitalWrite(IN1, LOW); digitalWrite(IN2, LOW); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
   delay(5);
-  
   digitalWrite(IN1, LOW); digitalWrite(IN2, LOW); digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
   delay(5);
 }
 
-// Function to stop the motor by setting all control pins LOW
 void stopMotor() {
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, LOW);
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  connectWiFi();
+  client.setServer(mqtt_server, mqtt_port);
+  connectMQTT();
+}
+
+void loop() {
+  if (!client.connected()) {
+    connectMQTT();
+  }
+  client.loop();
+
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    if (motorRunning) {
+      stopMotor();
+      motorRunning = false;
+      sentMQTT = false;
+    } else {
+      motorRunning = true;
+      if (!sentMQTT) {
+        client.publish(mqtt_topic, "5");
+        Serial.println("Published 5 to dispenserRunTime");
+        sentMQTT = true;
+      }
+    }
+  }
+
+  if (motorRunning) {
+    rotateMotor();
+  }
 }
