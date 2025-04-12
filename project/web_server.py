@@ -13,7 +13,6 @@ app.config['MQTT_TOPIC'] = 'dispenserRunTime'
 
 mqtt = Mqtt(app)
 
-# Constants
 FULL_ROLL_TIME = 300  #seconds
 ROLLS_PER_TREE = 1700
 CO2_PER_ROLL = 0.06  #pounds
