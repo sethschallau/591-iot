@@ -5,7 +5,7 @@
 const char* ssid = "SethPhone";
 const char* password = "sethisopen";
 
-const char* mqtt_server = "13.59.199.173";
+const char* mqtt_server = "3.147.73.221";
 const int mqtt_port = 1883;
 const char* mqtt_user = "ec2-user";
 const char* mqtt_pass = "591iot";
